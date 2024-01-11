@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/adityaqudaedah/go_restful_api/exception"
 	"github.com/adityaqudaedah/go_restful_api/helpers"
@@ -57,9 +58,10 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 	helpers.PanicIfError(err)
 
 	category,errFindById := service.CategoryRepository.FindById(ctx,tx,request.Id)
-	
+	fmt.Println(errFindById != nil)
+
 	if errFindById != nil{
-		panic(exception.NewNotFoundError("not found"))
+		panic(errFindById)
 	}
 
 	category.Name = request.Name
@@ -72,14 +74,15 @@ func (service *CategoryServiceImpl) Update(ctx context.Context, request web.Cate
 
 func(service *CategoryServiceImpl) Delete(ctx context.Context,requestId int){
 	tx,err := service.DB.Begin()
-	defer helpers.CommitOrRollback(tx)
 
 	helpers.PanicIfError(err)
+
+	defer helpers.CommitOrRollback(tx)
 
 	category,errFindById := service.CategoryRepository.FindById(ctx,tx,requestId)
 	
 	if errFindById != nil{
-		panic(exception.NewNotFoundError(err.Error()))
+		panic(exception.NewNotFoundError(errFindById.Error()))
 	}
 
 
@@ -91,10 +94,12 @@ func (service *CategoryServiceImpl) FindById(ctx context.Context,requestId int) 
 
 	helpers.PanicIfError(err)
 
+	defer helpers.CommitOrRollback(tx)
+
 	category,errFindById := service.CategoryRepository.FindById(ctx,tx,requestId)
 
 	if errFindById != nil{
-		panic(exception.NewNotFoundError(err.Error()))
+		panic(exception.NewNotFoundError(errFindById.Error()))
 	}
 
 	return helpers.ToCategoryResponse(category)
@@ -104,6 +109,8 @@ func (service *CategoryServiceImpl) FindAll(ctx context.Context) []web.CategoryR
 	tx,err := service.DB.Begin()
 
 	helpers.PanicIfError(err)
+
+	defer helpers.CommitOrRollback(tx)
 
 	categories := service.CategoryRepository.FindAll(ctx,tx)
 
