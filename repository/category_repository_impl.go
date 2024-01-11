@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/adityaqudaedah/go_restful_api/helpers"
 	"github.com/adityaqudaedah/go_restful_api/model/domain"
@@ -34,8 +33,6 @@ func (repository *CategoryRepositoryImpl) Create(ctx context.Context,tx *sql.Tx,
 func (repository *CategoryRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, category domain.Category)domain.Category  {
 	SQL := "UPDATE category SET name = ? WHERE id = ?"
 	_,errSql := tx.ExecContext(ctx,SQL,category.Name,category.Id)
-
-	fmt.Println("================",errSql)
 
 	helpers.PanicIfError(errSql)
 
